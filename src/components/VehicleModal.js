@@ -2,6 +2,9 @@
 import "../styles/VehicleModal.css"
 
 function VehicleModal({ vehicle, onClose }) {
+  // Debug: Log vehicle data structure
+  console.log("Modal vehicle data:", vehicle)
+  
   const getStatusColor = (status) => {
     const statusMap = {
       moving: "#10b981",
@@ -12,117 +15,146 @@ function VehicleModal({ vehicle, onClose }) {
     return statusMap[status?.toLowerCase()] || "#6b7280"
   }
 
+  const getBatteryColor = (level) => {
+    if (level <= 20) return "#ef4444"
+    if (level <= 50) return "#f59e0b"
+    return "#10b981"
+  }
+
+  const getFuelColor = (level) => {
+    if (level <= 25) return "#ef4444"
+    if (level <= 50) return "#f59e0b"
+    return "#10b981"
+  }
+
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-content modal-compact" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
-          <h2>Vehicle Details</h2>
+          <div className="modal-title-section">
+            <div className="modal-vehicle-icon">🚛</div>
+            <div>
+              <h2>{vehicle.id}</h2>
+              <p className="modal-subtitle">{vehicle.driver_name} • {vehicle.status?.toUpperCase()}</p>
+            </div>
+          </div>
           <button className="modal-close" onClick={onClose}>
             ×
           </button>
         </div>
 
         <div className="modal-body">
-          <div className="detail-section">
-            <h3>Basic Information</h3>
-            <div className="detail-grid">
-              <div className="detail-item">
-                <label>Vehicle ID</label>
-                <p>{vehicle.id}</p>
+          <div className="modal-grid">
+            <div className="modal-card">
+              <div className="card-header">
+                <span className="card-icon">✓</span>
+                STATUS
               </div>
-              <div className="detail-item">
-                <label>Status</label>
-                <p>
-                  <span className="status-badge" style={{ backgroundColor: getStatusColor(vehicle.status) }}>
-                    {vehicle.status}
-                  </span>
-                </p>
-              </div>
-              <div className="detail-item">
-                <label>Driver Name</label>
-                <p>{vehicle.driver_name || "N/A"}</p>
-              </div>
-              <div className="detail-item">
-                <label>Driver Phone</label>
-                <p>{vehicle.driver_phone || "N/A"}</p>
+              <div className="card-content">
+                <span className="status-badge-large" style={{ backgroundColor: getStatusColor(vehicle.status) }}>
+                  ✓ {vehicle.status?.toUpperCase()}
+                </span>
               </div>
             </div>
-          </div>
 
-          <div className="detail-section">
-            <h3>Location & Movement</h3>
-            <div className="detail-grid">
-              <div className="detail-item">
-                <label>Current Location</label>
-                <p>{vehicle.current_location || "N/A"}</p>
+            <div className="modal-card">
+              <div className="card-header">
+                <span className="card-icon">⚡</span>
+                CURRENT SPEED
               </div>
-              <div className="detail-item">
-                <label>Latitude</label>
-                <p>{vehicle.latitude || "N/A"}</p>
-              </div>
-              <div className="detail-item">
-                <label>Longitude</label>
-                <p>{vehicle.longitude || "N/A"}</p>
-              </div>
-              <div className="detail-item">
-                <label>Speed</label>
-                <p>{vehicle.speed || 0} km/h</p>
+              <div className="card-content">
+                <span className="metric-large">{vehicle.speed || 0} mph</span>
               </div>
             </div>
-          </div>
 
-          <div className="detail-section">
-            <h3>Vehicle Status</h3>
-            <div className="detail-grid">
-              <div className="detail-item">
-                <label>Fuel Level</label>
-                <div className="fuel-bar">
-                  <div className="fuel-fill" style={{ width: `${vehicle.fuel_level || 0}%` }}></div>
+            <div className="modal-card">
+              <div className="card-header">
+                <span className="card-icon">👤</span>
+                DRIVER
+              </div>
+              <div className="card-content">
+                <span className="metric-text">{vehicle.driver_name || "N/A"}</span>
+              </div>
+            </div>
+
+            <div className="modal-card">
+              <div className="card-header">
+                <span className="card-icon">📞</span>
+                PHONE
+              </div>
+              <div className="card-content">
+                <span className="metric-text">{vehicle.driver_phone || "N/A"}</span>
+              </div>
+            </div>
+
+            <div className="modal-card">
+              <div className="card-header">
+                <span className="card-icon">📍</span>
+                DESTINATION
+              </div>
+              <div className="card-content">
+                <span className="metric-text">{vehicle.destination || "N/A"}</span>
+              </div>
+            </div>
+
+            <div className="modal-card">
+              <div className="card-header">
+                <span className="card-icon">🗺️</span>
+                LOCATION
+              </div>
+              <div className="card-content">
+                <span className="metric-text metric-small">{vehicle.current_location || "N/A"}</span>
+              </div>
+            </div>
+
+            <div className="modal-card">
+              <div className="card-header">
+                <span className="card-icon">🔋</span>
+                BATTERY LEVEL
+              </div>
+              <div className="card-content">
+                <div className="progress-bar-container">
+                  <div 
+                    className="progress-bar-fill" 
+                    style={{ 
+                      width: `${vehicle.battery_level || 20}%`,
+                      backgroundColor: getBatteryColor(vehicle.battery_level || 20)
+                    }}
+                  ></div>
                 </div>
-                <p>{vehicle.fuel_level || 0}%</p>
+                <span className="metric-large">{vehicle.battery_level || 20}%</span>
               </div>
-              <div className="detail-item">
-                <label>Temperature</label>
-                <p>{vehicle.temperature || "N/A"}°C</p>
+            </div>
+
+            <div className="modal-card">
+              <div className="card-header">
+                <span className="card-icon">⛽</span>
+                FUEL LEVEL
               </div>
-              <div className="detail-item">
-                <label>Odometer</label>
-                <p>{vehicle.odometer || "N/A"} km</p>
+              <div className="card-content">
+                <div className="progress-bar-container">
+                  <div 
+                    className="progress-bar-fill" 
+                    style={{ 
+                      width: `${vehicle.fuel_level || 44}%`,
+                      backgroundColor: getFuelColor(vehicle.fuel_level || 44)
+                    }}
+                  ></div>
+                </div>
+                <span className="metric-large">{vehicle.fuel_level || 44}%</span>
               </div>
-              <div className="detail-item">
-                <label>Last Updated</label>
-                <p>{new Date(vehicle.updated_at).toLocaleString() || "N/A"}</p>
+            </div>
+
+            <div className="modal-card modal-card-full">
+              <div className="card-header">
+                <span className="card-icon">🕐</span>
+                LAST UPDATED
+              </div>
+              <div className="card-content">
+                <span className="metric-text">{vehicle.last_updated || "N/A"}</span>
               </div>
             </div>
           </div>
-
-          <div className="detail-section">
-            <h3>Delivery Information</h3>
-            <div className="detail-grid">
-              <div className="detail-item">
-                <label>Deliveries Completed</label>
-                <p>{vehicle.deliveries_completed || 0}</p>
-              </div>
-              <div className="detail-item">
-                <label>Deliveries Pending</label>
-                <p>{vehicle.deliveries_pending || 0}</p>
-              </div>
-              <div className="detail-item">
-                <label>Total Capacity</label>
-                <p>{vehicle.capacity || "N/A"} units</p>
-              </div>
-              <div className="detail-item">
-                <label>Current Load</label>
-                <p>{vehicle.current_load || 0} units</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="modal-footer">
-          <button className="btn-close" onClick={onClose}>
-            Close
-          </button>
         </div>
       </div>
     </div>

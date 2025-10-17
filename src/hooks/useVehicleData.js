@@ -5,34 +5,110 @@ import { useState, useEffect, useRef, useCallback } from "react"
 const API_BASE_URL = "https://case-study-26cf.onrender.com"
 const WS_URL = "wss://case-study-26cf.onrender.com"
 
+// ------------------------------
+// Helper: Normalize API vehicle
+// ------------------------------
+function normalizeVehicle(v = {}) {
+  const lat = v.currentLocation?.lat ?? v.latitude ?? null
+  const lng = v.currentLocation?.lng ?? v.longitude ?? null
+
+  const locationString =
+    lat != null && lng != null ? `${lat.toFixed(6)}, ${lng.toFixed(6)}` : "N/A"
+
+  // Convert status values to match UI color mappings
+  let status = v.status
+  if (status === "en_route") status = "moving"
+
+  return {
+    id: v.vehicleNumber || v.id,
+    driver_name: v.driverName || "N/A",
+    driver_phone: v.driverPhone || "N/A",
+    status,
+    destination: v.destination || "N/A",
+    current_location: locationString,
+    latitude: lat,
+    longitude: lng,
+    speed: v.speed || 0,
+    last_updated: v.lastUpdated || "N/A",
+    eta: v.estimatedArrival || "-",
+    battery_level: v.batteryLevel ?? 0,
+    fuel_level: v.fuelLevel ?? 0,
+  }
+}
+
 export function useVehicleData() {
   const [vehicles, setVehicles] = useState([])
   const [statistics, setStatistics] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
+  const [selectedVehicle, setSelectedVehicle] = useState(null)
+
   const wsRef = useRef(null)
   const reconnectTimeoutRef = useRef(null)
 
-  // Fetch vehicles from API
-  const fetchVehicles = useCallback(async () => {
+  // ------------------------------
+  // 1️⃣ Fetch ALL vehicles
+  // ------------------------------
+  const fetchAllVehicles = useCallback(async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/vehicles`)
       if (!response.ok) throw new Error("Failed to fetch vehicles")
       const data = await response.json()
-
-      // The API might return an array directly or an object with a data/vehicles property
-      const vehiclesArray = Array.isArray(data) ? data : data.data || data.vehicles || []
-      console.log("[v0] Vehicles fetched:", vehiclesArray)
-      setVehicles(vehiclesArray)
+      const vehiclesArray = Array.isArray(data)
+        ? data
+        : data.data || data.vehicles || []
+      setVehicles(vehiclesArray.map(normalizeVehicle))
       setError(null)
     } catch (err) {
+      console.error("Error fetching all vehicles:", err)
       setError(err.message)
-      console.error("Error fetching vehicles:", err)
-      setVehicles([]) // Ensure vehicles is always an array
+      setVehicles([])
     }
   }, [])
 
-  // Fetch statistics from API
+  // ------------------------------
+  // 2️⃣ Fetch SINGLE vehicle by ID
+  // ------------------------------
+  const fetchVehicleById = useCallback(async (id) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/vehicles/${id}`)
+      if (!response.ok) throw new Error("Vehicle not found")
+      const data = await response.json()
+      const vehicleObj =
+        !Array.isArray(data) && (data.data || data.vehicle || data)
+      const normalized = normalizeVehicle(vehicleObj)
+      setSelectedVehicle(normalized)
+      return normalized
+    } catch (err) {
+      console.error(`Error fetching vehicle ${id}:`, err)
+      setError(err.message)
+      return null
+    }
+  }, [])
+
+  // ------------------------------
+  // 3️⃣ Fetch vehicles by STATUS
+  // ------------------------------
+  const fetchVehiclesByStatus = useCallback(async (status) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/vehicles/status/${status}`)
+      if (!response.ok) throw new Error("Failed to fetch vehicles by status")
+      const data = await response.json()
+      const vehiclesArray = Array.isArray(data)
+        ? data
+        : data.data || data.vehicles || []
+      setVehicles(vehiclesArray.map(normalizeVehicle))
+      setError(null)
+    } catch (err) {
+      console.error(`Error fetching vehicles by status ${status}:`, err)
+      setError(err.message)
+      setVehicles([])
+    }
+  }, [])
+
+  // ------------------------------
+  // 4️⃣ Fetch fleet statistics
+  // ------------------------------
   const fetchStatistics = useCallback(async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/statistics`)
@@ -44,7 +120,9 @@ export function useVehicleData() {
     }
   }, [])
 
-  // Initialize WebSocket connection
+  // ------------------------------
+  // 5️⃣ Setup WebSocket
+  // ------------------------------
   const connectWebSocket = useCallback(() => {
     try {
       wsRef.current = new WebSocket(WS_URL)
@@ -63,13 +141,10 @@ export function useVehicleData() {
             const vehiclesArray = Array.isArray(data.vehicles)
               ? data.vehicles
               : data.vehicles.data || data.vehicles.vehicles || []
-            setVehicles(vehiclesArray)
+            setVehicles(vehiclesArray.map(normalizeVehicle))
           }
 
-          // Update statistics if provided
-          if (data.statistics) {
-            setStatistics(data.statistics)
-          }
+          if (data.statistics) setStatistics(data.statistics)
         } catch (err) {
           console.error("Error parsing WebSocket message:", err)
         }
@@ -82,11 +157,7 @@ export function useVehicleData() {
 
       wsRef.current.onclose = () => {
         console.log("WebSocket disconnected")
-        // Attempt to reconnect after 5 seconds
-        reconnectTimeoutRef.current = setTimeout(() => {
-          console.log("Attempting to reconnect WebSocket...")
-          connectWebSocket()
-        }, 5000)
+        reconnectTimeoutRef.current = setTimeout(connectWebSocket, 5000)
       }
     } catch (err) {
       console.error("Error connecting to WebSocket:", err)
@@ -94,38 +165,34 @@ export function useVehicleData() {
     }
   }, [])
 
-  // Initial data fetch and WebSocket setup
+  // ------------------------------
+  // 6️⃣ Initial load + cleanup
+  // ------------------------------
   useEffect(() => {
     const initializeData = async () => {
       setLoading(true)
-      await Promise.all([fetchVehicles(), fetchStatistics()])
+      await Promise.all([fetchAllVehicles(), fetchStatistics()])
       setLoading(false)
       connectWebSocket()
     }
 
     initializeData()
 
-    // Cleanup on unmount
     return () => {
-      if (wsRef.current) {
-        wsRef.current.close()
-      }
-      if (reconnectTimeoutRef.current) {
-        clearTimeout(reconnectTimeoutRef.current)
-      }
+      if (wsRef.current) wsRef.current.close()
+      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current)
     }
-  }, [fetchVehicles, fetchStatistics, connectWebSocket])
-
-  const updateVehicles = useCallback((newVehicles) => {
-    const vehiclesArray = Array.isArray(newVehicles) ? newVehicles : []
-    setVehicles(vehiclesArray)
-  }, [])
+  }, [fetchAllVehicles, fetchStatistics, connectWebSocket])
 
   return {
     vehicles,
     statistics,
     loading,
     error,
-    updateVehicles,
+    selectedVehicle,
+    setSelectedVehicle,
+    fetchAllVehicles,
+    fetchVehicleById,
+    fetchVehiclesByStatus,
   }
 }

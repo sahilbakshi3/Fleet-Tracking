@@ -1,7 +1,7 @@
 "use client"
 import "../styles/FilterBar.css"
 
-function FilterBar({ statistics, onFilterChange, currentFilter }) {
+function FilterBar({ statistics, onFilterChange, currentFilter, children }) {
   const filters = [
     { id: "all", label: "All Vehicles", count: statistics?.total || 0 },
     { id: "moving", label: "Moving", count: statistics?.moving || 0 },
@@ -23,6 +23,11 @@ function FilterBar({ statistics, onFilterChange, currentFilter }) {
             <span className="filter-count">{filter.count}</span>
           </button>
         ))}
+      </div>
+
+      {/* Vehicle list (passed from Dashboard) will appear here */}
+      <div className="filter-vehicle-list">
+        {children}
       </div>
     </div>
   )

@@ -7,9 +7,21 @@ function Dashboard({ vehicles, statistics, loading, onVehicleClick, onFilterChan
   return (
     <div className="dashboard">
       <div className="dashboard-container">
+        {/* Filter card appears above Fleet Statistics */}
+        <FilterBar
+          statistics={statistics}
+          onFilterChange={onFilterChange}
+          currentFilter={currentFilter}
+        >
+          <VehicleList
+            vehicles={vehicles}
+            loading={loading}
+            onVehicleClick={onVehicleClick}
+          />
+        </FilterBar>
+
+        {/* Fleet statistics grid */}
         <Statistics statistics={statistics} loading={loading} />
-        <FilterBar statistics={statistics} onFilterChange={onFilterChange} currentFilter={currentFilter} />
-        <VehicleList vehicles={vehicles} loading={loading} onVehicleClick={onVehicleClick} />
       </div>
     </div>
   )
