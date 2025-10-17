@@ -46,15 +46,14 @@ function VehicleTable({ vehicles, onVehicleClick, onSort, sortConfig }) {
   }
 
   const columns = [
-    { key: "id", label: "Vehicle ID", sortable: true },
+    { key: "id", label: "Vehicle", sortable: true },
     { key: "driver_name", label: "Driver", sortable: true },
     { key: "status", label: "Status", sortable: true },
     { key: "speed", label: "Speed", sortable: true },
     { key: "destination", label: "Destination", sortable: true },
-    { key: "current_location", label: "Location", sortable: false },
-    { key: "battery_level", label: "Battery", sortable: true },
-    { key: "fuel_level", label: "Fuel", sortable: true },
     { key: "eta", label: "ETA", sortable: false },
+    { key: "last_updated", label: "Last Update", sortable: false },
+    { key: "current_location", label: "Location", sortable: false },
   ]
 
   if (!vehicles || vehicles.length === 0) {
@@ -142,67 +141,21 @@ function VehicleTable({ vehicles, onVehicleClick, onSort, sortConfig }) {
                     </div>
                   </td>
                   
-                  <td className="location-cell">
-                    <div className="location-content" title={vehicle.current_location}>
-                      <span className="location-icon">🗺️</span>
-                      <span className="location-text">{vehicle.current_location}</span>
-                    </div>
-                  </td>
-                  
-                  <td className="battery-cell">
-                    <div className="resource-content">
-                      <div className="progress-bar-wrapper">
-                        <div
-                          className="progress-bar-mini"
-                          style={{
-                            width: `${vehicle.battery_level}%`,
-                            backgroundColor: batteryStatus.color
-                          }}
-                        >
-                          <span className="progress-shine"></span>
-                        </div>
-                      </div>
-                      <div className="resource-info">
-                        <span className="resource-value">{vehicle.battery_level}%</span>
-                        <span 
-                          className="resource-status" 
-                          style={{ color: batteryStatus.color }}
-                        >
-                          {batteryStatus.label}
-                        </span>
-                      </div>
-                    </div>
-                  </td>
-                  
-                  <td className="fuel-cell">
-                    <div className="resource-content">
-                      <div className="progress-bar-wrapper">
-                        <div
-                          className="progress-bar-mini"
-                          style={{
-                            width: `${vehicle.fuel_level}%`,
-                            backgroundColor: fuelStatus.color
-                          }}
-                        >
-                          <span className="progress-shine"></span>
-                        </div>
-                      </div>
-                      <div className="resource-info">
-                        <span className="resource-value">{vehicle.fuel_level}%</span>
-                        <span 
-                          className="resource-status" 
-                          style={{ color: fuelStatus.color }}
-                        >
-                          {fuelStatus.label}
-                        </span>
-                      </div>
-                    </div>
-                  </td>
-                  
                   <td className="eta-cell">
                     <div className="eta-content">
                       <span className="eta-icon">🕐</span>
                       <span className="eta-text">{vehicle.eta}</span>
+                    </div>
+                  </td>
+                  
+                  <td className="last-update-cell">
+                    <span className="last-update-text">{vehicle.last_updated}</span>
+                  </td>
+                  
+                  <td className="location-cell">
+                    <div className="location-content" title={vehicle.current_location}>
+                      <span className="location-icon">🗺️</span>
+                      <span className="location-text">{vehicle.current_location}</span>
                     </div>
                   </td>
                 </tr>

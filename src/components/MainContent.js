@@ -77,9 +77,8 @@ function MainContent({ vehicles, onVehicleClick, activeFilter }) {
         <div className="main-header-left">
           <div className="main-title-section">
             <h2 className="main-title">
-              {getFilterLabel(activeFilter)}
+              Vehicles ({vehicleCount})
             </h2>
-            <span className="vehicle-count-badge">{vehicleCount}</span>
           </div>
           <div className="search-container">
             <span className="search-icon">🔍</span>
@@ -104,7 +103,6 @@ function MainContent({ vehicles, onVehicleClick, activeFilter }) {
         
         <div className="main-header-right">
           <div className="live-indicator">
-            <span className="live-dot"></span>
             <span className="live-text">Live</span>
           </div>
           
