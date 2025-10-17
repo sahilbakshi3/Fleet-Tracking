@@ -1,0 +1,22 @@
+.vehicle-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.vehicle-list-loading,
+.vehicle-list-empty {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 3rem;
+  background: white;
+  border-radius: 0.75rem;
+  color: #6b7280;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .vehicle-list {
+    grid-template-columns: 1fr;
+  }
+}
