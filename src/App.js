@@ -1,124 +1,88 @@
-"use client"
-
-import { useState, useCallback } from "react"
-import "./App.css"
-import Dashboard from "./components/Dashboard"
+import React, { useState, useEffect } from "react"
+import Header from "./components/Header"
+import Sidebar from "./components/Sidebar"
+import MainContent from "./components/MainContent"
 import VehicleModal from "./components/VehicleModal"
 import { useVehicleData } from "./hooks/useVehicleData"
+import "./styles/App.css"
 
 function App() {
-  const [selectedVehicle, setSelectedVehicle] = useState(null)
-  const [showModal, setShowModal] = useState(false)
-  const [filter, setFilter] = useState("all")
-
-  // NOTE: useVehicleData should now return fetchAllVehicles, fetchVehicleById, fetchVehiclesByStatus
   const {
     vehicles,
     statistics,
     loading,
     error,
+    selectedVehicle,
+    lastUpdated,
+    setSelectedVehicle,
     fetchAllVehicles,
-    fetchVehicleById,
     fetchVehiclesByStatus,
-    updateVehicles,
   } = useVehicleData()
 
-  // Map UI filter -> API status path. Adjust if your backend uses different status names.
-  const filterToApiStatus = (uiFilter) => {
-    const map = {
-      all: null,
-      moving: "en_route",      // UI "moving" -> API "en_route"
-      idle: "idle",
-      delivered: "delivered",
-      maintenance: "maintenance",
+  const [activeFilter, setActiveFilter] = useState("all")
+  const [isModalOpen, setIsModalOpen] = useState(false)
+
+  const handleFilterChange = (filter) => {
+    setActiveFilter(filter)
+    if (filter === "all") {
+      fetchAllVehicles()
+    } else {
+      fetchVehiclesByStatus(filter)
     }
-    return map[uiFilter] ?? uiFilter
   }
 
-  // Clicking a vehicle row: fetch full details by id and open modal
-  const handleVehicleClick = useCallback(
-    async (vehicleOrId) => {
-      const id = typeof vehicleOrId === "string" ? vehicleOrId : vehicleOrId?.id
-      if (!id) return
+  const handleVehicleClick = (vehicle) => {
+    setSelectedVehicle(vehicle)
+    setIsModalOpen(true)
+  }
 
-      // try to fetch the full details from GET /api/vehicles/{id}
-      try {
-        const full = await fetchVehicleById(id)
-        if (full) {
-          setSelectedVehicle(full)
-          setShowModal(true)
-        } else {
-          // fallback: if fetch failed, try to open with the brief object in vehicles array
-          const fallback = vehicles.find((v) => v.id === id)
-          if (fallback) {
-            setSelectedVehicle(fallback)
-            setShowModal(true)
-          }
-        }
-      } catch (err) {
-        console.error("Error in handleVehicleClick:", err)
-      }
-    },
-    [fetchVehicleById, vehicles]
-  )
-
-  const handleCloseModal = useCallback(() => {
-    setShowModal(false)
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
     setSelectedVehicle(null)
-  }, [])
+  }
 
-  // When the filter button changes, call the status endpoint (or fetchAll)
-  const handleFilterChange = useCallback(
-    async (status) => {
-      setFilter(status)
-
-      const apiStatus = filterToApiStatus(status)
-      try {
-        if (!apiStatus) {
-          // "all"
-          if (typeof fetchAllVehicles === "function") await fetchAllVehicles()
-        } else {
-          // fetch by status endpoint
-          if (typeof fetchVehiclesByStatus === "function") {
-            await fetchVehiclesByStatus(apiStatus)
-          }
-        }
-      } catch (err) {
-        console.error("Error fetching vehicles for filter:", err)
-      }
-    },
-    [fetchAllVehicles, fetchVehiclesByStatus]
-  )
-
-  // Keep client-side fallback filtering if you want double-safety
-  const filteredVehicles = Array.isArray(vehicles)
-    ? filter === "all"
-      ? vehicles
-      : vehicles.filter((v) => (v.status || "").toLowerCase() === filter.toLowerCase())
-    : []
+  if (loading) {
+    return (
+      <div className="app">
+        <Header />
+        <div className="loading-container">
+          <div className="loading-spinner"></div>
+          <p>Loading fleet data...</p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="app">
-      <header className="app-header">
-        <div className="header-content">
-          <h1>Fleet Tracking Dashboard</h1>
-          <p>Real-time vehicle monitoring and management</p>
+      <Header />
+      
+      {error && (
+        <div className="error-banner">
+          ⚠️ {error}
         </div>
-      </header>
-
-      {error && <div className="error-banner">{error}</div>}
-
-      <Dashboard
-        vehicles={filteredVehicles}
-        statistics={statistics}
-        loading={loading}
-        onVehicleClick={handleVehicleClick}
-        onFilterChange={handleFilterChange}
-        currentFilter={filter}
-      />
-
-      {showModal && selectedVehicle && (
-        <VehicleModal vehicle={selectedVehicle} onClose={handleCloseModal} />
+      )}
+      
+      <div className="app-layout">
+        <Sidebar
+          statistics={statistics}
+          lastUpdated={lastUpdated}
+          onFilterChange={handleFilterChange}
+          activeFilter={activeFilter}
+        />
+        
+        <MainContent
+          vehicles={vehicles}
+          onVehicleClick={handleVehicleClick}
+          activeFilter={activeFilter}
+        />
+      </div>
+      
+      {isModalOpen && selectedVehicle && (
+        <VehicleModal
+          vehicle={selectedVehicle}
+          onClose={handleCloseModal}
+        />
       )}
     </div>
   )

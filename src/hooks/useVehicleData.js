@@ -1,13 +1,8 @@
-"use client"
-
 import { useState, useEffect, useRef, useCallback } from "react"
 
 const API_BASE_URL = "https://case-study-26cf.onrender.com"
 const WS_URL = "wss://case-study-26cf.onrender.com"
 
-// ------------------------------
-// Helper: Normalize API vehicle
-// ------------------------------
 function normalizeVehicle(v = {}) {
   const lat = v.currentLocation?.lat ?? v.latitude ?? null
   const lng = v.currentLocation?.lng ?? v.longitude ?? null
@@ -15,7 +10,6 @@ function normalizeVehicle(v = {}) {
   const locationString =
     lat != null && lng != null ? `${lat.toFixed(6)}, ${lng.toFixed(6)}` : "N/A"
 
-  // Convert status values to match UI color mappings
   let status = v.status
   if (status === "en_route") status = "moving"
 
@@ -36,19 +30,46 @@ function normalizeVehicle(v = {}) {
   }
 }
 
+function getRelativeTime(seconds) {
+  if (seconds < 60) return `${seconds}s ago`
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `${minutes}m ago`
+  const hours = Math.floor(minutes / 60)
+  return `${hours}h ago`
+}
+
 export function useVehicleData() {
   const [vehicles, setVehicles] = useState([])
   const [statistics, setStatistics] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [selectedVehicle, setSelectedVehicle] = useState(null)
+  const [lastUpdated, setLastUpdated] = useState("just now")
 
   const wsRef = useRef(null)
   const reconnectTimeoutRef = useRef(null)
+  const lastUpdateTimeRef = useRef(Date.now())
+  const updateIntervalRef = useRef(null)
 
-  // ------------------------------
-  // 1️⃣ Fetch ALL vehicles
-  // ------------------------------
+  // Update the relative time display
+  useEffect(() => {
+    updateIntervalRef.current = setInterval(() => {
+      const secondsAgo = Math.floor((Date.now() - lastUpdateTimeRef.current) / 1000)
+      setLastUpdated(getRelativeTime(secondsAgo))
+    }, 1000)
+
+    return () => {
+      if (updateIntervalRef.current) {
+        clearInterval(updateIntervalRef.current)
+      }
+    }
+  }, [])
+
+  const updateLastUpdateTime = useCallback(() => {
+    lastUpdateTimeRef.current = Date.now()
+    setLastUpdated("just now")
+  }, [])
+
   const fetchAllVehicles = useCallback(async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/vehicles`)
@@ -59,16 +80,14 @@ export function useVehicleData() {
         : data.data || data.vehicles || []
       setVehicles(vehiclesArray.map(normalizeVehicle))
       setError(null)
+      updateLastUpdateTime()
     } catch (err) {
       console.error("Error fetching all vehicles:", err)
       setError(err.message)
       setVehicles([])
     }
-  }, [])
+  }, [updateLastUpdateTime])
 
-  // ------------------------------
-  // 2️⃣ Fetch SINGLE vehicle by ID
-  // ------------------------------
   const fetchVehicleById = useCallback(async (id) => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/vehicles/${id}`)
@@ -86,9 +105,6 @@ export function useVehicleData() {
     }
   }, [])
 
-  // ------------------------------
-  // 3️⃣ Fetch vehicles by STATUS
-  // ------------------------------
   const fetchVehiclesByStatus = useCallback(async (status) => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/vehicles/status/${status}`)
@@ -99,16 +115,14 @@ export function useVehicleData() {
         : data.data || data.vehicles || []
       setVehicles(vehiclesArray.map(normalizeVehicle))
       setError(null)
+      updateLastUpdateTime()
     } catch (err) {
       console.error(`Error fetching vehicles by status ${status}:`, err)
       setError(err.message)
       setVehicles([])
     }
-  }, [])
+  }, [updateLastUpdateTime])
 
-  // ------------------------------
-  // 4️⃣ Fetch fleet statistics
-  // ------------------------------
   const fetchStatistics = useCallback(async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/statistics`)
@@ -120,9 +134,6 @@ export function useVehicleData() {
     }
   }, [])
 
-  // ------------------------------
-  // 5️⃣ Setup WebSocket
-  // ------------------------------
   const connectWebSocket = useCallback(() => {
     try {
       wsRef.current = new WebSocket(WS_URL)
@@ -142,6 +153,7 @@ export function useVehicleData() {
               ? data.vehicles
               : data.vehicles.data || data.vehicles.vehicles || []
             setVehicles(vehiclesArray.map(normalizeVehicle))
+            updateLastUpdateTime()
           }
 
           if (data.statistics) setStatistics(data.statistics)
@@ -163,11 +175,8 @@ export function useVehicleData() {
       console.error("Error connecting to WebSocket:", err)
       setError("Failed to connect to WebSocket")
     }
-  }, [])
+  }, [updateLastUpdateTime])
 
-  // ------------------------------
-  // 6️⃣ Initial load + cleanup
-  // ------------------------------
   useEffect(() => {
     const initializeData = async () => {
       setLoading(true)
@@ -181,6 +190,7 @@ export function useVehicleData() {
     return () => {
       if (wsRef.current) wsRef.current.close()
       if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current)
+      if (updateIntervalRef.current) clearInterval(updateIntervalRef.current)
     }
   }, [fetchAllVehicles, fetchStatistics, connectWebSocket])
 
@@ -190,6 +200,7 @@ export function useVehicleData() {
     loading,
     error,
     selectedVehicle,
+    lastUpdated,
     setSelectedVehicle,
     fetchAllVehicles,
     fetchVehicleById,

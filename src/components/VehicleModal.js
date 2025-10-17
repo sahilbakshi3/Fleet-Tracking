@@ -1,10 +1,6 @@
-"use client"
 import "../styles/VehicleModal.css"
 
 function VehicleModal({ vehicle, onClose }) {
-  // Debug: Log vehicle data structure
-  console.log("Modal vehicle data:", vehicle)
-  
   const getStatusColor = (status) => {
     const statusMap = {
       moving: "#10b981",
@@ -29,7 +25,7 @@ function VehicleModal({ vehicle, onClose }) {
 
   return (
     <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content modal-compact" onClick={(e) => e.stopPropagation()}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div className="modal-title-section">
             <div className="modal-vehicle-icon">🚛</div>
