@@ -2,71 +2,26 @@ import React from "react";
 import "../styles/VehicleModal.css";
 import {
   Truck,
-  Check,
-  Zap,
+  Gauge,
   User,
   Phone,
   MapPin,
-  Map,
   Battery,
-  Droplet,
+  Fuel,
   Clock,
+  MousePointer2,
+  Check,
 } from "lucide-react";
 
-function Icon({ name, className }) {
-  const props = { size: 16, strokeWidth: 1.6, className: className || "" };
-  switch (name) {
-    case "truck":
-      return <Truck {...props} />;
-    case "check":
-      return <Check {...props} />;
-    case "zap":
-      return <Zap {...props} />;
-    case "user":
-      return <User {...props} />;
-    case "phone":
-      return <Phone {...props} />;
-    case "pin":
-      return <MapPin {...props} />;
-    case "map":
-      return <Map {...props} />;
-    case "battery":
-      return <Battery {...props} />;
-    case "fuel":
-      return <Droplet {...props} />;
-    case "clock":
-      return <Clock {...props} />;
-    default:
-      return null;
-  }
-}
-
 function VehicleModal({ vehicle = {}, onClose }) {
-  const getStatusColor = (status) => {
-    const statusMap = {
-      moving: "#10b981",
-      idle: "#f59e0b",
-      delivered: "#06b6d4",
-      maintenance: "#ef4444",
-    };
-    return statusMap[status?.toLowerCase()] || "#6b7280";
-  };
-
-  const getBatteryColor = (level) => {
-    if (level <= 20) return "#ef4444";
-    if (level <= 50) return "#f59e0b";
-    return "#10b981";
-  };
-
-  const getFuelColor = (level) => {
-    if (level <= 25) return "#ef4444";
-    if (level <= 50) return "#f59e0b";
-    return "#10b981";
-  };
+  const battery = vehicle.battery_level ?? 20;
+  const fuel = vehicle.fuel_level ?? 44;
+  const statusClass = (vehicle.status || "unknown").toLowerCase();
 
   return (
     <div className="vm-overlay" onClick={onClose}>
       <div className="vm-content" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
         <div className="vm-header">
           <div className="vm-title-left">
             <div className="vm-truck-wrap">
@@ -88,140 +43,160 @@ function VehicleModal({ vehicle = {}, onClose }) {
           </button>
         </div>
 
+        {/* Body */}
         <div className="vm-body">
           <div className="vm-grid">
+
             {/* STATUS */}
             <div className="vm-card">
-              <div className="card-header">
-                <Icon name="check" className="card-header-icon" />
-                <span>STATUS</span>
-              </div>
-              <div className="card-content">
-                <span
-                  className="status-pill"
-                  style={{
-                    backgroundColor: getStatusColor(vehicle.status),
-                    color: "#ffffff",
-                  }}
-                >
-                  <Check size={14} strokeWidth={2} />
-                  <strong className="status-text">{(vehicle.status || "N/A").toUpperCase()}</strong>
-                </span>
+              <div className="card-inner">
+                <div className="card-header">
+                  <MousePointer2
+                    size={16}
+                    strokeWidth={1.8}
+                    className="card-header-icon"
+                    style={{ transform: "rotate(90deg)" }} // points to the right
+                  />
+                  <span>STATUS</span>
+                </div>
+                <div className="card-content">
+                  {/* Use class-based styling so CSS controls appearance */}
+                  <span className={`status-pill ${statusClass}`}>
+                    <Check size={14} strokeWidth={2.2} />
+                    <strong className="status-text">{(vehicle.status || "N/A").toUpperCase()}</strong>
+                  </span>
+                </div>
               </div>
             </div>
 
             {/* SPEED */}
             <div className="vm-card">
-              <div className="card-header">
-                <Icon name="zap" className="card-header-icon" />
-                <span>CURRENT SPEED</span>
-              </div>
-              <div className="card-content">
-                <div className="metric-big">
-                  {vehicle.speed ?? 0}
-                  <span className="metric-unit"> mph</span>
+              <div className="card-inner">
+                <div className="card-header">
+                  <Gauge size={16} strokeWidth={1.8} className="card-header-icon" />
+                  <span>CURRENT SPEED</span>
+                </div>
+                <div className="card-content">
+                  <div className="metric-big">
+                    {vehicle.speed ?? 0}
+                    <span className="metric-unit"> mph</span>
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* DRIVER */}
             <div className="vm-card">
-              <div className="card-header">
-                <Icon name="user" className="card-header-icon" />
-                <span>DRIVER</span>
-              </div>
-              <div className="card-content">
-                <div className="metric-medium">{vehicle.driver_name || "N/A"}</div>
+              <div className="card-inner">
+                <div className="card-header">
+                  <User size={16} strokeWidth={1.8} className="card-header-icon" />
+                  <span>DRIVER</span>
+                </div>
+                <div className="card-content">
+                  <div className="metric-medium">{vehicle.driver_name || "N/A"}</div>
+                </div>
               </div>
             </div>
 
             {/* PHONE */}
             <div className="vm-card">
-              <div className="card-header">
-                <Icon name="phone" className="card-header-icon" />
-                <span>PHONE</span>
-              </div>
-              <div className="card-content">
-                <div className="metric-medium">{vehicle.driver_phone || "N/A"}</div>
+              <div className="card-inner">
+                <div className="card-header">
+                  <Phone size={16} strokeWidth={1.8} className="card-header-icon" />
+                  <span>PHONE</span>
+                </div>
+                <div className="card-content">
+                  <div className="metric-medium">{vehicle.driver_phone || "N/A"}</div>
+                </div>
               </div>
             </div>
 
             {/* DESTINATION */}
             <div className="vm-card">
-              <div className="card-header">
-                <Icon name="pin" className="card-header-icon" />
-                <span>DESTINATION</span>
-              </div>
-              <div className="card-content">
-                <div className="metric-medium">{vehicle.destination || "N/A"}</div>
+              <div className="card-inner">
+                <div className="card-header">
+                  <MapPin size={16} strokeWidth={1.8} className="card-header-icon" />
+                  <span>DESTINATION</span>
+                </div>
+                <div className="card-content">
+                  <div className="metric-medium">{vehicle.destination || "N/A"}</div>
+                </div>
               </div>
             </div>
 
             {/* LOCATION */}
             <div className="vm-card">
-              <div className="card-header">
-                <Icon name="map" className="card-header-icon" />
-                <span>LOCATION</span>
-              </div>
-              <div className="card-content">
-                <div className="metric-small">{vehicle.current_location || "N/A"}</div>
+              <div className="card-inner">
+                <div className="card-header">
+                  <MousePointer2
+                    size={16}
+                    strokeWidth={1.8}
+                    className="card-header-icon"
+                    style={{ transform: "rotate(90deg)" }} // points right
+                  />
+                  <span>LOCATION</span>
+                </div>
+                <div className="card-content">
+                  <div className="metric-small">{vehicle.current_location || "N/A"}</div>
+                </div>
               </div>
             </div>
 
-            {/* BATTERY */}
-            <div className="vm-card">
-              <div className="card-header">
-                <Icon name="battery" className="card-header-icon" />
-                <span>BATTERY LEVEL</span>
-              </div>
-              <div className="card-content">
-                <div className="progress-wrap">
-                  <div className="progress-bar">
-                    <div
-                      className="progress-fill"
-                      style={{
-                        width: `${vehicle.battery_level ?? 20}%`,
-                        backgroundColor: getBatteryColor(vehicle.battery_level ?? 20),
-                      }}
-                    />
-                  </div>
+            {/* BATTERY LEVEL */}
+            <div className="vm-card battery-card">
+              <div className="card-inner">
+                <div className="card-header">
+                  <Battery size={16} strokeWidth={1.8} className="card-header-icon" />
+                  <span>BATTERY LEVEL</span>
                 </div>
-                <div className="metric-big percent">{vehicle.battery_level ?? 20}%</div>
+                <div className="card-content">
+                  <div className="progress-wrap">
+                    <div className="progress-bar">
+                      <div
+                        className="progress-fill battery-fill"
+                        style={{ width: `${battery}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  <div className="metric-big percent">{battery}%</div>
+                </div>
               </div>
             </div>
 
-            {/* FUEL */}
-            <div className="vm-card">
-              <div className="card-header">
-                <Icon name="fuel" className="card-header-icon" />
-                <span>FUEL LEVEL</span>
-              </div>
-              <div className="card-content">
-                <div className="progress-wrap">
-                  <div className="progress-bar">
-                    <div
-                      className="progress-fill"
-                      style={{
-                        width: `${vehicle.fuel_level ?? 44}%`,
-                        backgroundColor: getFuelColor(vehicle.fuel_level ?? 44),
-                      }}
-                    />
-                  </div>
+            {/* FUEL LEVEL */}
+            <div className="vm-card fuel-card">
+              <div className="card-inner">
+                <div className="card-header">
+                  <Fuel size={16} strokeWidth={1.8} className="card-header-icon" />
+                  <span>FUEL LEVEL</span>
                 </div>
-                <div className="metric-big percent">{vehicle.fuel_level ?? 44}%</div>
+                <div className="card-content">
+                  <div className="progress-wrap">
+                    <div className="progress-bar">
+                      <div
+                        className="progress-fill fuel-fill"
+                        style={{ width: `${fuel}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                  <div className="metric-big percent">{fuel}%</div>
+                </div>
               </div>
             </div>
 
             {/* LAST UPDATED */}
             <div className="vm-card vm-card-full">
-              <div className="card-header">
-                <Icon name="clock" className="card-header-icon" />
-                <span>LAST UPDATED</span>
-              </div>
-              <div className="card-content">
-                <div className="metric-medium">{vehicle.last_updated || "N/A"}</div>
+              <div className="card-inner">
+                <div className="card-header">
+                  <Clock size={16} strokeWidth={1.8} className="card-header-icon" />
+                  <span>LAST UPDATED</span>
+                </div>
+                <div className="card-content">
+                  <div className="metric-medium">{vehicle.last_updated || "N/A"}</div>
+                </div>
               </div>
             </div>
+
           </div>
         </div>
       </div>
