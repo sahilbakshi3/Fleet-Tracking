@@ -51,7 +51,60 @@ export function useVehicleData() {
   const lastUpdateTimeRef = useRef(Date.now())
   const updateIntervalRef = useRef(null)
 
-  // Update the relative time display
+  // Calculate statistics from vehicles array
+  const calculateStatistics = useCallback((vehiclesArray) => {
+    if (!Array.isArray(vehiclesArray) || vehiclesArray.length === 0) {
+      return {
+        total: 0,
+        idle: 0,
+        moving: 0,
+        delivered: 0,
+        maintenance: 0,
+        averageSpeed: 0
+      }
+    }
+
+    const stats = {
+      total: vehiclesArray.length,
+      idle: 0,
+      moving: 0,
+      delivered: 0,
+      maintenance: 0,
+      averageSpeed: 0
+    }
+
+    let totalSpeed = 0
+    let speedCount = 0
+
+    vehiclesArray.forEach(vehicle => {
+      const status = vehicle.status?.toLowerCase()
+      
+      // Count by status
+      if (status === 'idle') {
+        stats.idle++
+      } else if (status === 'moving' || status === 'en_route') {
+        stats.moving++
+      } else if (status === 'delivered') {
+        stats.delivered++
+      } else if (status === 'maintenance') {
+        stats.maintenance++
+      }
+
+      // Calculate average speed (only for moving vehicles or vehicles with speed > 0)
+      const speed = parseFloat(vehicle.speed)
+      if (!isNaN(speed) && speed > 0) {
+        totalSpeed += speed
+        speedCount++
+      }
+    })
+
+    // Calculate average speed
+    stats.averageSpeed = speedCount > 0 ? totalSpeed / speedCount : 0
+
+    return stats
+  }, [])
+
+  // Update the relative time display every second
   useEffect(() => {
     updateIntervalRef.current = setInterval(() => {
       const secondsAgo = Math.floor((Date.now() - lastUpdateTimeRef.current) / 1000)
@@ -78,15 +131,29 @@ export function useVehicleData() {
       const vehiclesArray = Array.isArray(data)
         ? data
         : data.data || data.vehicles || []
-      setVehicles(vehiclesArray.map(normalizeVehicle))
+      const normalizedVehicles = vehiclesArray.map(normalizeVehicle)
+      setVehicles(normalizedVehicles)
+      
+      // Calculate statistics from the fetched vehicles
+      const calculatedStats = calculateStatistics(normalizedVehicles)
+      setStatistics(calculatedStats)
+      
       setError(null)
       updateLastUpdateTime()
     } catch (err) {
       console.error("Error fetching all vehicles:", err)
       setError(err.message)
       setVehicles([])
+      setStatistics({
+        total: 0,
+        idle: 0,
+        moving: 0,
+        delivered: 0,
+        maintenance: 0,
+        averageSpeed: 0
+      })
     }
-  }, [updateLastUpdateTime])
+  }, [updateLastUpdateTime, calculateStatistics])
 
   const fetchVehicleById = useCallback(async (id) => {
     try {
@@ -113,24 +180,51 @@ export function useVehicleData() {
       const vehiclesArray = Array.isArray(data)
         ? data
         : data.data || data.vehicles || []
-      setVehicles(vehiclesArray.map(normalizeVehicle))
+      const normalizedVehicles = vehiclesArray.map(normalizeVehicle)
+      setVehicles(normalizedVehicles)
+      
+      // Calculate statistics from the filtered vehicles
+      const calculatedStats = calculateStatistics(normalizedVehicles)
+      setStatistics(calculatedStats)
+      
       setError(null)
       updateLastUpdateTime()
     } catch (err) {
       console.error(`Error fetching vehicles by status ${status}:`, err)
       setError(err.message)
       setVehicles([])
+      setStatistics({
+        total: 0,
+        idle: 0,
+        moving: 0,
+        delivered: 0,
+        maintenance: 0,
+        averageSpeed: 0
+      })
     }
-  }, [updateLastUpdateTime])
+  }, [updateLastUpdateTime, calculateStatistics])
 
   const fetchStatistics = useCallback(async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/statistics`)
       if (!response.ok) throw new Error("Failed to fetch statistics")
       const data = await response.json()
-      setStatistics(data)
+      
+      // Merge API statistics with calculated statistics
+      // Prefer calculated statistics but allow API to override if available
+      if (data && Object.keys(data).length > 0) {
+        setStatistics(prev => {
+          if (!prev) return data
+          return {
+            ...prev,
+            ...data
+          }
+        })
+      }
     } catch (err) {
       console.error("Error fetching statistics:", err)
+      // Don't overwrite calculated statistics on error
+      // The calculated statistics will remain as fallback
     }
   }, [])
 
@@ -148,15 +242,31 @@ export function useVehicleData() {
           const data = JSON.parse(event.data)
           console.log("WebSocket message received:", data)
 
+          // Handle vehicle updates from WebSocket
           if (data.vehicles) {
             const vehiclesArray = Array.isArray(data.vehicles)
               ? data.vehicles
               : data.vehicles.data || data.vehicles.vehicles || []
-            setVehicles(vehiclesArray.map(normalizeVehicle))
+            const normalizedVehicles = vehiclesArray.map(normalizeVehicle)
+            setVehicles(normalizedVehicles)
+            
+            // Calculate statistics from WebSocket vehicle data
+            const calculatedStats = calculateStatistics(normalizedVehicles)
+            setStatistics(calculatedStats)
+            
             updateLastUpdateTime()
           }
 
-          if (data.statistics) setStatistics(data.statistics)
+          // Handle statistics updates from WebSocket
+          if (data.statistics) {
+            setStatistics(prev => {
+              if (!prev) return data.statistics
+              return {
+                ...prev,
+                ...data.statistics
+              }
+            })
+          }
         } catch (err) {
           console.error("Error parsing WebSocket message:", err)
         }
@@ -169,28 +279,42 @@ export function useVehicleData() {
 
       wsRef.current.onclose = () => {
         console.log("WebSocket disconnected")
+        // Attempt to reconnect after 5 seconds
         reconnectTimeoutRef.current = setTimeout(connectWebSocket, 5000)
       }
     } catch (err) {
       console.error("Error connecting to WebSocket:", err)
       setError("Failed to connect to WebSocket")
     }
-  }, [updateLastUpdateTime])
+  }, [updateLastUpdateTime, calculateStatistics])
 
+  // Initialize data on component mount
   useEffect(() => {
     const initializeData = async () => {
       setLoading(true)
+      
+      // Fetch initial vehicle data and statistics
       await Promise.all([fetchAllVehicles(), fetchStatistics()])
+      
       setLoading(false)
+      
+      // Connect to WebSocket for real-time updates
       connectWebSocket()
     }
 
     initializeData()
 
+    // Cleanup function
     return () => {
-      if (wsRef.current) wsRef.current.close()
-      if (reconnectTimeoutRef.current) clearTimeout(reconnectTimeoutRef.current)
-      if (updateIntervalRef.current) clearInterval(updateIntervalRef.current)
+      if (wsRef.current) {
+        wsRef.current.close()
+      }
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current)
+      }
+      if (updateIntervalRef.current) {
+        clearInterval(updateIntervalRef.current)
+      }
     }
   }, [fetchAllVehicles, fetchStatistics, connectWebSocket])
 

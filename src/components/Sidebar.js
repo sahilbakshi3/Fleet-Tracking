@@ -4,10 +4,10 @@ import "../styles/Sidebar.css";
 
 function Sidebar({ statistics, lastUpdated, onFilterChange, activeFilter }) {
   const statusOptions = [
-    { value: "all", label: "All", count: statistics?.total ?? 25 },
-    { value: "idle", label: "Idle", count: statistics?.idle ?? 6 },
-    { value: "moving", label: "En Route", count: statistics?.moving ?? 1 },
-    { value: "delivered", label: "Delivered", count: statistics?.delivered ?? 18 },
+    { value: "all", label: "All", count: statistics?.total ?? 0 },
+    { value: "idle", label: "Idle", count: statistics?.idle ?? 0 },
+    { value: "moving", label: "En Route", count: statistics?.moving ?? 0 },
+    { value: "delivered", label: "Delivered", count: statistics?.delivered ?? 0 },
   ];
 
   return (
@@ -60,7 +60,7 @@ function Sidebar({ statistics, lastUpdated, onFilterChange, activeFilter }) {
           <div className="stats-container">
             <div className="stats-grid">
               <div className="stat-card">
-                <div className="stat-value">{statistics.total ?? 25}</div>
+                <div className="stat-value">{statistics.total ?? 0}</div>
                 <div className="stat-label">
                   <Users size={14} className="stat-icon" />
                   TOTAL FLEET
@@ -68,7 +68,7 @@ function Sidebar({ statistics, lastUpdated, onFilterChange, activeFilter }) {
               </div>
 
               <div className="stat-card">
-                <div className="stat-value">{statistics.averageSpeed?.toFixed(0) ?? 3}</div>
+                <div className="stat-value">{statistics.averageSpeed?.toFixed(0) ?? 0}</div>
                 <div className="stat-label">
                   <Gauge size={14} className="stat-icon" />
                   AVG SPEED
@@ -76,7 +76,7 @@ function Sidebar({ statistics, lastUpdated, onFilterChange, activeFilter }) {
               </div>
 
               <div className="stat-card">
-                <div className="stat-value">{statistics.moving ?? 1}</div>
+                <div className="stat-value">{statistics.moving ?? 0}</div>
                 <div className="stat-label">
                   <TrendingUp size={14} className="stat-icon" />
                   MOVING
@@ -84,7 +84,7 @@ function Sidebar({ statistics, lastUpdated, onFilterChange, activeFilter }) {
               </div>
 
               <div className="stat-card">
-                <div className="stat-value">14:40</div>
+                <div className="stat-value">{lastUpdated}</div>
                 <div className="stat-label">
                   <Clock size={14} className="stat-icon" />
                   LAST UPDATE
