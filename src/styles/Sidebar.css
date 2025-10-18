@@ -63,7 +63,9 @@
   gap: 0.625rem;
 }
 
+/* Filter button base */
 .filter-button {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -72,20 +74,50 @@
   border: 2px solid #e5e7eb;
   border-radius: 0.375rem;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   min-height: 44px;
+  text-align: left;
 }
 
+/* visual circle indicator inside button (left) */
+.filter-button::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background-color: #9ca3af; /* default gray */
+  transition: background-color 0.15s ease, transform 0.15s ease;
+}
+
+/* data-status mapping */
+.filter-button[data-status="all"]::before { background-color: #9ca3af; }
+.filter-button[data-status="idle"]::before { background-color: #9ca3af; }
+.filter-button[data-status="en_route"]::before { background-color: #3b82f6; }
+.filter-button[data-status="moving"]::before { background-color: #3b82f6; } /* fallback */
+.filter-button[data-status="delivered"]::before { background-color: #10b981; }
+
+/* hover */
 .filter-button:hover {
   border-color: #3b82f6;
   background-color: #f9fafb;
 }
 
+/* active single button styles (only applied to .active) */
 .filter-button.active {
   border-color: #3b82f6;
   background-color: #eff6ff;
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.06);
 }
 
+.filter-button.active .filter-count {
+  color: #3b82f6;
+}
+
+/* content inside button */
 .filter-content {
   display: flex;
   align-items: center;
@@ -95,20 +127,16 @@
 }
 
 .filter-label {
-  font-weight: 400;
+  font-weight: 600;
   font-size: 0.875rem;
-  color: black;
-  white-space: nowrap;
+  color: #111827;
+  margin-left: 18px; /* offset to account for the circle */
 }
 
 .filter-count {
   font-weight: 600;
   font-size: 0.875rem;
   color: #6b7280;
-}
-
-.filter-button.active .filter-count {
-  color: #3b82f6;
 }
 
 /* Fleet Statistics */
@@ -193,16 +221,17 @@
   }
 }
 
-/* Sidebar Footer */
+/* Sidebar Footer placed after stats (not pinned to bottom) */
 .sidebar-footer {
-  margin-top: auto;
-  padding-top: 1rem;
+  margin-top: 0;
+  padding-top: 0.5rem;
+  padding-bottom: 0.25rem;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .last-updated {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  display: block;
   padding: 0.75rem;
   background-color: #f9fafb;
   border: 1px solid #e5e7eb;
@@ -211,13 +240,15 @@
   color: #6b7280;
 }
 
-.update-icon {
-  flex-shrink: 0;
+.last-updated .update-icon {
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 0.5rem;
 }
 
-.update-text {
-  flex: 1;
-  min-width: 0;
+.last-updated .update-text {
+  display: inline-block;
+  vertical-align: middle;
   line-height: 1.4;
 }
 
@@ -239,45 +270,6 @@
   background: #9ca3af;
 }
 
-/* === STATUS CIRCLE INSIDE FILTER BUTTON === */
-.filter-button {
-  position: relative;
-  padding-left: 2.25rem; /* adds space for the circle inside */
-}
-
-/* circle base style */
-.filter-button::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 12px; /* distance from left border */
-  transform: translateY(-50%);
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background-color: #9ca3af; /* default gray */
-  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
-}
-
-/* colors based on status */
-.filter-button[data-status="all"]::before {
-  background-color: #9ca3af; /* gray */
-}
-
-.filter-button[data-status="idle"]::before {
-  background-color: #9ca3af; /* gray */
-}
-
-.filter-button[data-status="moving"]::before {
-  background-color: #3b82f6; /* blue */
-}
-
-.filter-button[data-status="delivered"]::before {
-  background-color: #10b981; /* green */
-}
-
-
-
 /* Responsive Design */
 @media (max-width: 768px) {
   .sidebar {
@@ -287,20 +279,20 @@
     max-height: 400px;
     padding: 1rem;
   }
-  
+
   .status-filters {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .filter-button,
   .stat-card {
     min-height: 70px;
   }
-  
+
   .stat-value {
     font-size: 1.75rem;
   }

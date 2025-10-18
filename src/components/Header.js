@@ -6,9 +6,9 @@ function Header() {
     <header className="page-header">
       {/* Optional emoji icon — remove the span if you don't want an icon */}
       <div className="page-header-left">
-        <span className="header-icon" aria-hidden="true">🚛</span>
+        {/* <span className="header-icon" aria-hidden="true">🚛</span> */}
         <div>
-          <h1 className="header-title">Fleet Tracking Dashboard</h1>
+          <h1 className="header-title">🚛 Fleet Tracking Dashboard</h1>
           <p className="header-subtitle">Real-time vehicle monitoring • LogiNext Case Study</p>
         </div>
       </div>

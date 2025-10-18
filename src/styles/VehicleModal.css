@@ -70,8 +70,11 @@
   font-weight: 600;
 }
 
-.vm-status-inline {
-  color: #10b981;
+/* Header status is plain text (no emoji, no special coloring) */
+.vm-status-inline-header {
+  color: inherit;
+  font-weight: 700;
+  margin-left: 4px;
 }
 
 /* Close Button */
@@ -135,7 +138,7 @@
   align-items: center;
   gap: 6px;
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 400;
   color: #9ca3af;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -155,6 +158,7 @@
   gap: 12px;
 }
 
+/* Status pill base */
 .status-pill {
   display: inline-flex;
   align-items: center;
@@ -163,32 +167,41 @@
   border-radius: 9999px;
   font-weight: 700;
   font-size: 0.95rem;
-  color: #15803d;           /* dark green text */
-  background-color: #dcfce7;/* light green background */
+  color: #15803d;           /* default dark green text */
+  background-color: #dcfce7;/* default light green background */
   box-shadow: none;
   line-height: 1;
 }
 
-/* ensure lucide icons inside pill get the green stroke/fill */
-.status-pill svg,
-.status-pill > svg {
-  stroke: #16a34a;
-  color: #16a34a;
+/* emoji inside pill */
+.status-emoji-pill {
+  font-size: 1rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* optional variants (keep these if you use class names like "status-pill delivered") */
+/* variants */
+/* delivered (green) */
 .status-pill.delivered {
   color: #15803d;
   background-color: #dcfce7;
 }
-.status-pill.moving {
-  color: #047857;
-  background-color: #d1fae5;
+
+/* en_route (light blue) */
+.status-pill.en_route {
+  color: #2563eb;
+  background-color: #dbeafe;
 }
+
+/* idle (grey) */
 .status-pill.idle {
-  color: #92400e;
-  background-color: #fff7ed;
+  color: #6b7280;
+  background-color: #f3f4f6;
 }
+
+/* maintenance (red) */
 .status-pill.maintenance {
   color: #991b1b;
   background-color: #fee2e2;
@@ -210,20 +223,20 @@
 .metric-medium {
   font-size: 15px;
   font-weight: 600;
-  color: #374151;
+  color: black;
 }
 
 .metric-small {
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 500;
-  color: #6b7280;
+  color: black;
   max-width: 300px;
 }
 
 .metric-unit {
   font-size: 16px;
   font-weight: 600;
-  color: #6b7280;
+  color: black;
   margin-left: 2px;
 }
 

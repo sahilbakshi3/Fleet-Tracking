@@ -247,11 +247,20 @@
   font-weight: 400;
 }
 
-/* ETA Cell */
+/* ETA Cell (centered header + cells) */
 .eta-cell {
   text-align: center;
 }
 
+.vehicle-table thead th:nth-child(6) .th-content {
+  justify-content: center;
+}
+
+.vehicle-table thead th:nth-child(6) {
+  text-align: center;
+}
+
+/* ETA content styling */
 .eta-content {
   display: inline-flex;
   align-items: center;
@@ -260,6 +269,7 @@
   padding: 0;
   background-color: transparent;
   border-radius: 0;
+  white-space: nowrap;
 }
 
 .eta-icon {
@@ -270,6 +280,19 @@
   color: #1f2937;
   font-weight: 400;
   font-size: 0.875rem;
+  display: inline-block;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Ensure ETA cells are centered vertically and horizontally */
+.vehicle-table tbody td:nth-child(6) {
+  text-align: center;
+  vertical-align: middle;
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
 }
 
 /* Empty State */
@@ -366,6 +389,17 @@
   .vehicle-table th,
   .vehicle-table td {
     padding: 0.75rem 0.75rem;
+    font-size: 0.8125rem;
+  }
+
+  /* Slightly tighten ETA column on small screens */
+  .vehicle-table tbody td:nth-child(6),
+  .vehicle-table thead th:nth-child(6) {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .eta-text {
     font-size: 0.8125rem;
   }
 }

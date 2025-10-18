@@ -1,43 +1,74 @@
-import React from "react"
-import "../styles/VehicleTable.css"
+import React from "react";
+import "../styles/VehicleTable.css";
 
 function VehicleTable({ vehicles, onVehicleClick, onSort, sortConfig }) {
-  const getStatusStyle = (status) => {
-    const statusLower = status?.toLowerCase()
-    
-    // Map for status styles
-    const statusStyles = {
-      delivered: {
-        backgroundColor: "#d1fae5",
-        color: "#059669"
-      },
-      idle: {
-        backgroundColor: "#f3f4f6",
-        color: "#4b5563"
-      },
-      moving: {
-        backgroundColor: "#d1fae5",
-        color: "#059669"
-      },
-      maintenance: {
-        backgroundColor: "#fee2e2",
-        color: "#dc2626"
-      }
-    }
-    
-    return statusStyles[statusLower] || statusStyles.idle
-  }
+  // Normalize status values
+  const normalizeStatusKey = (status) => {
+    if (!status) return "idle";
+    const s = String(status).toLowerCase();
+    if (s === "moving" || s === "en-route") return "en_route";
+    if (s === "en_route") return "en_route";
+    return s;
+  };
 
+  // Status color styles
+  const getStatusStyle = (status) => {
+    const statusKey = normalizeStatusKey(status);
+
+    const statusStyles = {
+      delivered: { backgroundColor: "#d1fae5", color: "#059669" },
+      idle: { backgroundColor: "#f3f4f6", color: "#4b5563" },
+      en_route: { backgroundColor: "#dbeafe", color: "#2563eb" },
+      maintenance: { backgroundColor: "#fee2e2", color: "#dc2626" },
+    };
+
+    return statusStyles[statusKey] || statusStyles.idle;
+  };
+
+  // Sorting indicator icon
   const getSortIcon = (columnKey) => {
-    if (sortConfig.key !== columnKey) {
-      return <span className="sort-icon">⇅</span>
+    if (!sortConfig || sortConfig.key !== columnKey) {
+      return <span className="sort-icon">⇅</span>;
     }
     return sortConfig.direction === "asc" ? (
       <span className="sort-icon active">↑</span>
     ) : (
       <span className="sort-icon active">↓</span>
-    )
-  }
+    );
+  };
+
+  // ✅ Helper: Format timestamp into "DD/MM/YYYY, HH:MM:SS"
+  const formatDateTime = (value) => {
+    if (!value || value === "-" || value === "-") return "-";
+
+    const date = new Date(value);
+    if (isNaN(date.getTime())) return value;
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
+    const hours = String(date.getHours()).padStart(2, "0");
+    const minutes = String(date.getMinutes()).padStart(2, "0");
+    const seconds = String(date.getSeconds()).padStart(2, "0");
+
+    return `${day}/${month}/${year}, ${hours}:${minutes}:${seconds}`;
+  };
+
+  // ✅ Helper: Format location (lat, lng) to 4 decimal places
+  const formatLocation = (location) => {
+    if (!location || location === "N/A") return "N/A";
+
+    const parts = location.split(",");
+    if (parts.length !== 2) return location;
+
+    const lat = parseFloat(parts[0]);
+    const lng = parseFloat(parts[1]);
+
+    if (isNaN(lat) || isNaN(lng)) return location;
+
+    return `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+  };
 
   const columns = [
     { key: "id", label: "Vehicle", sortable: true },
@@ -48,7 +79,7 @@ function VehicleTable({ vehicles, onVehicleClick, onSort, sortConfig }) {
     { key: "eta", label: "ETA", sortable: false },
     { key: "last_updated", label: "Last Update", sortable: false },
     { key: "current_location", label: "Location", sortable: false },
-  ]
+  ];
 
   if (!vehicles || vehicles.length === 0) {
     return (
@@ -61,7 +92,7 @@ function VehicleTable({ vehicles, onVehicleClick, onSort, sortConfig }) {
           </p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -84,10 +115,18 @@ function VehicleTable({ vehicles, onVehicleClick, onSort, sortConfig }) {
               ))}
             </tr>
           </thead>
+
           <tbody>
             {vehicles.map((vehicle, index) => {
-              const statusStyle = getStatusStyle(vehicle.status)
-              
+              const rawStatus = vehicle.status ?? "";
+              const statusKey = normalizeStatusKey(rawStatus);
+              const displayStatus =
+                statusKey === "en_route"
+                  ? "EN-ROUTE"
+                  : (rawStatus || "N/A").toUpperCase();
+
+              const statusStyle = getStatusStyle(rawStatus);
+
               return (
                 <tr
                   key={vehicle.id || index}
@@ -99,58 +138,72 @@ function VehicleTable({ vehicles, onVehicleClick, onSort, sortConfig }) {
                       <span className="vehicle-id-text">{vehicle.id}</span>
                     </div>
                   </td>
-                  
+
                   <td className="driver-cell">
                     <div className="driver-info">
                       <span className="driver-name">{vehicle.driver_name}</span>
                     </div>
                   </td>
-                  
+
                   <td className="status-cell">
-                    <span
-                      className="status-badge"
-                      style={statusStyle}
-                    >
-                      <span className="status-text">{vehicle.status?.toUpperCase()}</span>
+                    <span className="status-badge" style={statusStyle}>
+                      <span className="status-text">{displayStatus}</span>
                     </span>
                   </td>
-                  
+
                   <td className="speed-cell">
                     <div className="speed-content">
                       <span className="speed-value">{vehicle.speed}</span>
                       <span className="speed-unit">mph</span>
                     </div>
                   </td>
-                  
+
                   <td className="destination-cell">
-                    <div className="destination-content" title={vehicle.destination}>
-                      <span className="destination-text">{vehicle.destination}</span>
+                    <div
+                      className="destination-content"
+                      title={vehicle.destination}
+                    >
+                      <span className="destination-text">
+                        {vehicle.destination}
+                      </span>
                     </div>
                   </td>
-                  
+
+                  {/* ETA formatted */}
                   <td className="eta-cell">
                     <div className="eta-content">
-                      <span className="eta-text">{vehicle.eta}</span>
+                      <span className="eta-text">
+                        {formatDateTime(vehicle.eta)}
+                      </span>
                     </div>
                   </td>
-                  
+
+                  {/* Last Update formatted */}
                   <td className="last-update-cell">
-                    <span className="last-update-text">{vehicle.last_updated}</span>
+                    <span className="last-update-text">
+                      {formatDateTime(vehicle.last_updated)}
+                    </span>
                   </td>
-                  
+
+                  {/* Location formatted to 4 decimal places */}
                   <td className="location-cell">
-                    <div className="location-content" title={vehicle.current_location}>
-                      <span className="location-text">{vehicle.current_location}</span>
+                    <div
+                      className="location-content"
+                      title={formatLocation(vehicle.current_location)}
+                    >
+                      <span className="location-text">
+                        {formatLocation(vehicle.current_location)}
+                      </span>
                     </div>
                   </td>
                 </tr>
-              )
+              );
             })}
           </tbody>
         </table>
       </div>
     </div>
-  )
+  );
 }
 
-export default VehicleTable
+export default VehicleTable;
