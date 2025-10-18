@@ -21,13 +21,13 @@
 .vehicle-table thead {
   position: sticky;
   top: 0;
-  background-color: #ffffff;
+  background-color: #f9fafb;
   z-index: 10;
-  border-bottom: 2px solid #e5e7eb;
+  border-bottom: 1px solid #e5e7eb;
 }
 
 .vehicle-table th {
-  padding: 1rem 1.5rem;
+  padding: 0.875rem 1.5rem;
   text-align: left;
   font-weight: 600;
   color: #374151;
@@ -35,7 +35,7 @@
   font-size: 0.875rem;
   letter-spacing: 0;
   white-space: nowrap;
-  background-color: #ffffff;
+  background-color: #f9fafb;
 }
 
 .vehicle-table th.sortable {
@@ -45,7 +45,7 @@
 }
 
 .vehicle-table th.sortable:hover {
-  background-color: #f9fafb;
+  background-color: #f3f4f6;
 }
 
 .th-content {
@@ -66,10 +66,11 @@
 }
 
 .vehicle-table td {
-  padding: 1rem 1.5rem;
+  padding: 0.875rem 1.5rem;
   border-bottom: 1px solid #f3f4f6;
   color: #1f2937;
   vertical-align: middle;
+  font-size: 0.875rem;
 }
 
 .vehicle-row {
@@ -143,19 +144,27 @@
   text-transform: uppercase;
   letter-spacing: 0.025em;
   box-shadow: none;
-  background-color: #10b981;
 }
 
-.status-badge[style*="#f59e0b"] {
-  background-color: #6b7280 !important;
-  color: white;
-}
-
+/* Delivered - Green */
 .status-badge[style*="#8b5cf6"] {
   background-color: #10b981 !important;
   color: white;
 }
 
+/* Idle - Gray */
+.status-badge[style*="#f59e0b"] {
+  background-color: #6b7280 !important;
+  color: white;
+}
+
+/* Moving/En Route - Keep Green */
+.status-badge[style*="#10b981"] {
+  background-color: #10b981 !important;
+  color: white;
+}
+
+/* Maintenance - Red */
 .status-badge[style*="#ef4444"] {
   background-color: #ef4444 !important;
   color: white;
@@ -181,7 +190,7 @@
 }
 
 .speed-value {
-  font-weight: 600;
+  font-weight: 400;
   font-size: 0.875rem;
   color: #1f2937;
 }
@@ -259,16 +268,18 @@
 .last-update-text {
   font-size: 0.875rem;
   color: #1f2937;
+  font-weight: 400;
 }
 
 /* ETA Cell */
 .eta-cell {
-  text-align: left;
+  text-align: center;
 }
 
 .eta-content {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0;
   padding: 0;
   background-color: transparent;
@@ -283,17 +294,6 @@
   color: #1f2937;
   font-weight: 400;
   font-size: 0.875rem;
-}
-
-/* Last Update Cell - This was missing, adding it */
-.vehicle-table th:nth-last-child(2) {
-  min-width: 180px;
-}
-
-.vehicle-table td:nth-last-child(2) {
-  font-size: 0.875rem;
-  color: #1f2937;
-  font-weight: 400;
 }
 
 /* Empty State */
@@ -390,5 +390,6 @@
   .vehicle-table th,
   .vehicle-table td {
     padding: 0.75rem 0.75rem;
+    font-size: 0.8125rem;
   }
 }
