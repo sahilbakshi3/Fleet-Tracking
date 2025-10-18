@@ -1,25 +1,67 @@
-.header {
-  background-color: #1f2937;
-  color: white;
-  padding: 0 2rem;
-  height: 40px;
+/* Header container — light background, roomy padding like the design */
+.page-header {
+  background-color: #ffffff;       /* white page header */
+  padding: 20px 28px;             /* roomy padding like design */
+  border-bottom: 1px solid #e8eef5;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+/* left area contains icon + title/subtitle */
+.page-header-left {
   display: flex;
   align-items: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  gap: 12px;
 }
 
+/* optional icon (emoji or SVG) */
+.header-icon {
+  font-size: 22px;       /* adjusts icon size */
+  line-height: 1;
+  display: inline-block;
+}
+
+/* main title — larger and darker */
 .header-title {
-  font-size: 1.125rem;
-  font-weight: 600;
   margin: 0;
+  font-size: 20px;       /* 20px matches the example headline size */
+  font-weight: 700;
+  color: #0f1724;        /* near-black navy for crisp title */
+  letter-spacing: -0.2px;
 }
 
+/* muted subtitle beneath the title */
+.header-subtitle {
+  margin: 6px 0 0 0;
+  font-size: 13px;
+  color: #6b7280;        /* gray text for subtitle */
+  font-weight: 500;
+}
+
+/* right area reserved for buttons (kept small) */
+.page-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Responsive adjustments */
 @media (max-width: 768px) {
-  .header {
-    padding: 0 1rem;
+  .page-header {
+    padding: 14px 16px;
   }
-  
+
   .header-title {
-    font-size: 1rem;
+    font-size: 18px;
+  }
+
+  .header-icon {
+    font-size: 18px;
+  }
+
+  .header-subtitle {
+    font-size: 12px;
   }
 }
