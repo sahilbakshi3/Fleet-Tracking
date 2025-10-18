@@ -106,52 +106,45 @@
 /* ==== CARD STYLE ==== */
 .vm-card {
   position: relative;
-  background: #f8fbfd;
+  background: #f9fafb;
   border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  padding: 14px 16px;
+  border-radius: 12px;
+  padding: 16px;
   display: flex;
   flex-direction: column;
   justify-content: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03);
-  transition: box-shadow 0.2s ease, transform 0.15s ease;
-  min-height: 72px;
-  overflow: hidden; /* ensures stripe corners match card */
+  min-height: 80px;
+  overflow: hidden;
 }
 
-/* Solid blue stripe on left, rounded to match card corners */
+/* Blue left stripe */
 .vm-card::before {
   content: "";
   position: absolute;
   top: 0;
   left: 0;
-  width: 8px;
+  width: 4px;
   height: 100%;
-  background-color: #2563eb;
-  border-top-left-radius: 16px;
-  border-bottom-left-radius: 16px;
-}
-
-/* Hover lift effect */
-.vm-card:hover {
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
-  transform: translateY(-2px);
+  background-color: #3b82f6;
+  border-radius: 12px;
 }
 
 /* Header + Icon */
 .card-header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   font-size: 11px;
-  font-weight: 700;
-  color: #6b7280;
+  font-weight: 600;
+  color: #9ca3af;
   text-transform: uppercase;
-  margin-bottom: 6px;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
 }
 
 .card-header-icon {
-  color: #4b5563;
+  color: #9ca3af;
+  opacity: 0.8;
 }
 
 /* Card Content */
@@ -162,13 +155,6 @@
   gap: 12px;
 }
 
-/* -------------------------
-   STATUS PILL (subtle light green)
-   Matches the first screenshot:
-   - Light green background
-   - Green check icon & green text
-   - Rounded pill shape, bold text
-   ------------------------- */
 .status-pill {
   display: inline-flex;
   align-items: center;
@@ -210,25 +196,35 @@
 
 /* Text + Metrics */
 .metric-big {
-  font-size: 22px;
-  font-weight: 800;
-  color: #0f1724;
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  line-height: 1;
 }
 
 .metric-big.percent {
-  font-size: 18px;
+  font-size: 20px;
+  font-weight: 700;
 }
 
 .metric-medium {
   font-size: 15px;
-  font-weight: 700;
-  color: #111827;
+  font-weight: 600;
+  color: #374151;
 }
 
 .metric-small {
   font-size: 13px;
-  color: #374151;
+  font-weight: 500;
+  color: #6b7280;
   max-width: 300px;
+}
+
+.metric-unit {
+  font-size: 16px;
+  font-weight: 600;
+  color: #6b7280;
+  margin-left: 2px;
 }
 
 /* Progress Bars */
@@ -260,7 +256,7 @@
 
 /* Full-width Card */
 .vm-card.vm-card-full {
-  grid-column: 1 / -1;
+  grid-column: 1;
 }
 
 /* Responsive */

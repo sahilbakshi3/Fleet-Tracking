@@ -27,7 +27,7 @@
 }
 
 .vehicle-table th {
-  padding: 0.875rem 1.5rem;
+  padding: 0.5rem 1.25rem;
   text-align: left;
   font-weight: 600;
   color: #374151;
@@ -66,7 +66,7 @@
 }
 
 .vehicle-table td {
-  padding: 0.875rem 1.5rem;
+  padding: 0.5rem 1.25rem;
   border-bottom: 1px solid #f3f4f6;
   color: #1f2937;
   vertical-align: middle;
@@ -128,7 +128,7 @@
 
 /* Status Cell - PILL SHAPE */
 .status-cell {
-  min-width: 120px;
+  min-width: 125px;
 }
 
 .status-badge {
@@ -158,7 +158,7 @@
 
 .speed-content {
   display: inline-block;
-  padding: 0.5rem 1.25rem;
+  padding: 0.25rem 0.5rem;
   border-radius: 10px;
   background-color: #f3f4f6;
   white-space: nowrap;

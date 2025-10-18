@@ -1,14 +1,14 @@
-import React from "react"
-import { Wifi, Filter, Clock, Users, Gauge, TrendingUp } from "lucide-react"
-import "../styles/Sidebar.css"
+import React from "react";
+import { Wifi, Filter, Clock, Users, Gauge, TrendingUp } from "lucide-react";
+import "../styles/Sidebar.css";
 
 function Sidebar({ statistics, lastUpdated, onFilterChange, activeFilter }) {
   const statusOptions = [
-    { value: "all", label: "All", count: statistics?.total || 25 },
-    { value: "idle", label: "Idle", count: statistics?.idle || 6 },
-    { value: "moving", label: "En Route", count: statistics?.moving || 1 },
-    { value: "delivered", label: "Delivered", count: statistics?.delivered || 18 },
-  ]
+    { value: "all", label: "All", count: statistics?.total ?? 25 },
+    { value: "idle", label: "Idle", count: statistics?.idle ?? 6 },
+    { value: "moving", label: "En Route", count: statistics?.moving ?? 1 },
+    { value: "delivered", label: "Delivered", count: statistics?.delivered ?? 18 },
+  ];
 
   return (
     <aside className="sidebar">
@@ -24,27 +24,30 @@ function Sidebar({ statistics, lastUpdated, onFilterChange, activeFilter }) {
           <Filter size={16} />
           Filter by Status
         </h3>
-        
+
         <div className="status-filters">
           {statusOptions.map((option) => {
+            const isActive = activeFilter === option.value;
             return (
               <button
                 key={option.value}
-                className={`filter-button ${activeFilter === option.value ? "active" : ""}`}
+                data-status={option.value}
+                className={`filter-button ${isActive ? "active" : ""}`}
                 onClick={() => onFilterChange(option.value)}
+                aria-pressed={isActive}
               >
                 <div className="filter-content">
                   <span className="filter-label">{option.label}</span>
                   <span className="filter-count">( {option.count} )</span>
                 </div>
               </button>
-            )
+            );
           })}
         </div>
       </div>
 
       {/* Divider Line */}
-      <div className="sidebar-divider"></div>
+      <div className="sidebar-divider" />
 
       {/* Fleet Statistics Section */}
       <div className="sidebar-section">
@@ -52,34 +55,34 @@ function Sidebar({ statistics, lastUpdated, onFilterChange, activeFilter }) {
           <Clock size={16} />
           Fleet Statistics
         </h3>
-        
+
         {statistics ? (
           <div className="stats-container">
             <div className="stats-grid">
               <div className="stat-card">
-                <div className="stat-value">{statistics.total || 25}</div>
+                <div className="stat-value">{statistics.total ?? 25}</div>
                 <div className="stat-label">
                   <Users size={14} className="stat-icon" />
                   TOTAL FLEET
                 </div>
               </div>
-              
+
               <div className="stat-card">
-                <div className="stat-value">{statistics.averageSpeed?.toFixed(0) || 3}</div>
+                <div className="stat-value">{statistics.averageSpeed?.toFixed(0) ?? 3}</div>
                 <div className="stat-label">
                   <Gauge size={14} className="stat-icon" />
                   AVG SPEED
                 </div>
               </div>
-              
+
               <div className="stat-card">
-                <div className="stat-value">{statistics.moving || 1}</div>
+                <div className="stat-value">{statistics.moving ?? 1}</div>
                 <div className="stat-label">
                   <TrendingUp size={14} className="stat-icon" />
                   MOVING
                 </div>
               </div>
-              
+
               <div className="stat-card">
                 <div className="stat-value">14:40</div>
                 <div className="stat-label">
@@ -91,7 +94,7 @@ function Sidebar({ statistics, lastUpdated, onFilterChange, activeFilter }) {
           </div>
         ) : (
           <div className="stats-loading">
-            <div className="loading-spinner-small"></div>
+            <div className="loading-spinner-small" />
             <span>Loading stats...</span>
           </div>
         )}
@@ -107,7 +110,7 @@ function Sidebar({ statistics, lastUpdated, onFilterChange, activeFilter }) {
         </div>
       </div>
     </aside>
-  )
+  );
 }
 
-export default Sidebar
+export default Sidebar;
