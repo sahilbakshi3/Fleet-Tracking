@@ -9,7 +9,7 @@ function Header() {
         {/* <span className="header-icon" aria-hidden="true">🚛</span> */}
         <div>
           <h1 className="header-title">🚛 Fleet Tracking Dashboard</h1>
-          <p className="header-subtitle">Real-time vehicle monitoring • LogiNext Case Study</p>
+          <p className="header-subtitle">Real-time vehicle monitoring</p>
         </div>
       </div>
 
